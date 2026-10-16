@@ -8,12 +8,12 @@ def armar_peticion(pregunta):
     if not pregunta:
         raise ValueError("La pregunta no puede estar vacía")
     
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("API_KEY")
     if not api_key:
-        raise ValueError("No se encontró la variable de entorno GEMINI_API_KEY")
+        raise ValueError("No se encontró la variable de entorno API_KEY")
         
     # Cambiado a un modelo compatible con la API (puedes ajustarlo según tu preferencia, ej. gemini-1.5-flash)
-    modelo = "gemini-1.5-flash"
+    modelo = "gemini-3.6-flash"
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{modelo}:generateContent?key={api_key}"
     body = {"contents": [{"parts": [{"text": pregunta}]}]}
     return url, body
