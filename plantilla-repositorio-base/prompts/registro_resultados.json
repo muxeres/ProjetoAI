@@ -1,0 +1,20 @@
+{
+  "clasificar_tema": {
+    "intentos": 3,
+    "exitos": 3,
+    "fallos_formato": 0,
+    "errores_api": 0
+  },
+  "clasificar_prioridad": {
+    "intentos": 3,
+    "exitos": 2,
+    "fallos_formato": 0,
+    "errores_api": 1
+  },
+  "clasificar_sentimiento": {
+    "intentos": 3,
+    "exitos": 1,
+    "fallos_formato": 0,
+    "errores_api": 2
+  }
+}
