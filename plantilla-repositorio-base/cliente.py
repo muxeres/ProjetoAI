@@ -17,8 +17,12 @@ def con_reintento(
             print(f"Intento {intento+1} de {intentos} falló por límite de uso/servidor. Reintentando...")
             time.sleep(espera_segundos)
 
+def consultar_modelo(consulta: str) -> str:
+    url, cuerpo = armar_peticion("gemini-3.5-flash-lite", consulta, "")
+    respuesta = con_reintento(lambda: enviar_peticion(url, cuerpo))
+    return extraer_texto(respuesta)
 
-#Cómo ejecuto esto?
+
 if __name__ == "__main__":
     url, cuerpo = armar_peticion("gemini-3.5-flash-lite", "Hola", "")
     respuesta = con_reintento(lambda: enviar_peticion(url, cuerpo))
