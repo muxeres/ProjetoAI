@@ -17,8 +17,8 @@ def crear_esquema_clasificacion(enum_valores):
 
 MENSAJE = (
     "No puedo acceder al portal desde ayer. "
-    "Ya cambié mi contraseña y sigo bloqueado. "
-    "Hoy vence la entrega de mi informe y estoy muy molesto."
+    "Ya cambié mi contraseña y sigo bloqueada. "
+    "Hoy vence la entrega de mi informe y estoy muy molesta."
 )
 
 BANCO_DE_PROMPTS = [
