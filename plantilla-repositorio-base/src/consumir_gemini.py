@@ -14,25 +14,45 @@ MODELO = "gemini-3.6-flash"
 URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/"
 API_KEY = os.getenv("GEMINI_API_KEY")
 
-#función para crear la solicitud
-def armar_peticion(modelo, pregunta, system_instruction, response_schema=None): #pregunta = "Confirma la conexion"
+# --- VERSIÓN ORIGINAL DE armar_peticion (sin control de tokens de razonamiento) ---
+# def armar_peticion(modelo, pregunta, system_instruction, response_schema=None): #pregunta = "Confirma la conexion"
+#     if not pregunta:
+#         raise ValueError("La pregunta no puede estar vacía")
+#     url = f"{URL_BASE}{modelo}:generateContent?key={API_KEY}" #url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=MI API KEY"
+#     body = {
+#             "systemInstruction": {
+#                 "parts": [ {"text": system_instruction} ]
+#             },
+#             "contents": 
+#                 [{"parts": [{"text": pregunta}]}]
+#         }
+#     
+#     if response_schema is not None:
+#         body["generationConfig"] = {
+#             "responseMimeType": "application/json",
+#             "responseSchema": response_schema
+#         }
+# 
+#     return url, body
+
+# MEJORA: Desactiva el razonamiento interno (thinkingBudget=0) para reducir el gasto de tokens y latencia.
+def armar_peticion(modelo, pregunta, system_instruction, response_schema=None):
     if not pregunta:
         raise ValueError("La pregunta no puede estar vacía")
-    url = f"{URL_BASE}{modelo}:generateContent?key={API_KEY}" #url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=MI API KEY"
+    url = f"{URL_BASE}{modelo}:generateContent?key={API_KEY}"
     body = {
-            "systemInstruction": {
-                "parts": [ {"text": system_instruction} ]
-            },
-            "contents": 
-                [{"parts": [{"text": pregunta}]}]
-        }
-    
-    if response_schema is not None:
-        body["generationConfig"] = {
-            "responseMimeType": "application/json",
-            "responseSchema": response_schema
-        }
+        "systemInstruction": {
+            "parts": [{"text": system_instruction}]
+        },
+        "contents": [{"parts": [{"text": pregunta}]}],
+        "generationConfig": {
+            "thinkingConfig": {"thinkingBudget": 0}
+        },
+    }
 
+    if response_schema is not None:
+        body["generationConfig"]["responseMimeType"] = "application/json"
+        body["generationConfig"]["responseSchema"] = response_schema
 
     return url, body
 
@@ -87,8 +107,6 @@ def obtener_dato_de_prueba(pregunta): #pregunta = "Confirma la conexion"
 
     inicio = time.perf_counter() #Empezar el contador
 
-    #url = resultado de armar_peticion
-    #body = resultado de armar_peticion
     datos = enviar_peticion(url, body)
 
     fin = time.perf_counter() #Termina el contador
@@ -101,29 +119,22 @@ def obtener_dato_de_prueba(pregunta): #pregunta = "Confirma la conexion"
     datos_formateados = parsear_respuesta_json(texto, ["categoria", "nivel"])
     return datos_formateados
 
-#def calcular_costo(datos: dict, precio_entrada: float, precio_salida: float) -> float:
+# --- VERSIÓN ORIGINAL DE calcular_costo (fallaba si thoughtsTokenCount no venía en la respuesta) ---
+# def calcular_costo(datos, precio_entrada, precio_salida):
+#     uso = datos["usageMetadata"]
+#     tokens_entrada = uso["promptTokenCount"]
+#     tokens_salida = uso["candidatesTokenCount"]
+#     tokens_razonamiento = uso["thoughtsTokenCount"] #revisar si existe o no, si no existe colocarlo como 0
+#     costo = (tokens_entrada * precio_entrada) + ( (tokens_salida + tokens_razonamiento) * precio_salida )
+#     return costo
+
+# MEJORA: Usa .get("thoughtsTokenCount", 0) para evitar KeyError cuando el razonamiento está desactivado.
 def calcular_costo(datos, precio_entrada, precio_salida):
-    #datos = {dict... "usageMetadata"}
     uso = datos["usageMetadata"]
-    '''
-    uso = {
-        "promptTokenCount": 10,
-        "candidatesTokenCount": 471,
-        "totalTokenCount": 1377,
-        "promptTokensDetails": [
-            {
-                "modality": "TEXT",
-                "tokenCount": 10
-            }
-        ],
-        "thoughtsTokenCount": 896,
-        "serviceTier": "standard"
-    }
-    '''
     tokens_entrada = uso["promptTokenCount"]
     tokens_salida = uso["candidatesTokenCount"]
-    tokens_razonamiento = uso["thoughtsTokenCount"] #revisar si existe o no, si no existe colocarlo como 0
-    costo = (tokens_entrada * precio_entrada) + ( (tokens_salida + tokens_razonamiento) * precio_salida )
+    tokens_razonamiento = uso.get("thoughtsTokenCount", 0)
+    costo = (tokens_entrada * precio_entrada) + ((tokens_salida + tokens_razonamiento) * precio_salida)
     return costo
 
 def parsear_respuesta_json(texto, claves_requeridas=None):
@@ -150,17 +161,3 @@ if __name__ == "__main__": #Solamente ejecútalo si el archivo en el que estoy e
             print(obtener_dato_de_prueba("Confirma en una frase corta que esta conexión funciona"))
     except (ValueError, RuntimeError, TimeoutError) as error:
         print("No se pudo completar la operación: ", error)
-
-'''
-Ejecute 4 veces la MISMA petición con 1 modelo
-y ante cada petición se calcule e imprima: Latencia, Costo, Respuesta
-
-Vuelvo a hacer lo mismo con un modelo distinto
-
-3 modelos a comparar
-
-OBJETIVO: Elijas el mejor modelo para tu proyecto
-
-Prompt sea algo relacionado con tu proyecto.
-'''
-
