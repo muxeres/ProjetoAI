@@ -1,4 +1,4 @@
-from dotenv import load_dotenv
+﻿from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI #Modelo
 from langchain_core.prompts import PromptTemplate #Plantilla -> Prompt dinámico
 from langchain_core.output_parsers import StrOutputParser #Parsea la respuesta y la transforma en solo textos
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # modelo = ChatGoogleGenerativeAI(model="gemini-3.6-flash")
-modelo = ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite", temperature=0)
+modelo = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite", temperature=0)
 
 plantilla_clasificacion = PromptTemplate.from_template(
     "Clasifica el siguiente mensaje de soporte en una sola palabra: "

@@ -1,4 +1,4 @@
-import logging
+﻿import logging
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-modelo = ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite", temperature=0)
+modelo = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite", temperature=0)
 
 plantilla_clasificacion = PromptTemplate.from_template(
     "Clasifica el siguiente mensaje de soporte en una sola palabra: "
